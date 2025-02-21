@@ -13,9 +13,12 @@ USER root
 # Keep package names in alphabetical order
 RUN apt-get update ;\
 	apt-get install --no-install-recommends --no-install-suggests -y \
-		curl iputils-ping vim-tiny wget ;\
+		curl iputils-ping less vim-tiny wget ;\
 	apt-get clean ;\
 	rm -vrf /var/lib/apt/lists/*
+
+# Update the owner of the web files so we can edit them inside the container for debugging
+RUN chown -R www-data:www-data /usr/share/icingaweb2
 
 # Switch the user back to www-data so things run cleanly
 USER www-data
