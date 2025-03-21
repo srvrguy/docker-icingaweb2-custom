@@ -5,6 +5,7 @@ set -exo pipefail
 
 ACTION="$1"
 TAG="${2:-latest}"
+DEBUG_TAG="$TAG-debug"
 
 if [ -z "$REPO_OWNER"]; then
     echo "Environment variable REPO_OWNER is not set. This should be set by the build system automatically. If you are running this manually, set it before running." >&2
@@ -37,14 +38,17 @@ fi
 echo "Selected tool is: $BUILDTOOL"
 
 WORKING_DIR="$(realpath "$(dirname "$0")")"
-COMMON_ARGS=(--tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$TAG" $WORKING_DIR)
+RELEASE_ARGS=(--target release --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$TAG" $WORKING_DIR)
+DEBUG_ARGS=(--target debug --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$DEBUG_TAG" $WORKING_DIR)
 BUILD_CMD=($BUILDTOOL build --platform "$(cat platforms.txt)")
 
 case "$ACTION" in
 	build)
-		"${BUILD_CMD[@]}" "${COMMON_ARGS[@]}"
+		"${BUILD_CMD[@]}" "${RELEASE_ARGS[@]}"
+		"${BUILD_CMD[@]}" "${DEBUG_ARGS[@]}"
 		;;
 	push)
-		"${BUILD_CMD[@]}" --push "${COMMON_ARGS[@]}"
+		"${BUILD_CMD[@]}" --push "${RELEASE_ARGS[@]}"
+		"${BUILD_CMD[@]}" --push "${DEBUG_ARGS[@]}"
 		;;
 esac
