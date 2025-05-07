@@ -12,7 +12,7 @@ RUN /get-mods.sh snapshot
 
 # Pull our base image in. This instance of the image will be the target to which
 # we apply our modifications
-FROM icinga/icingaweb2:2.12.2 AS base
+FROM icinga/icingaweb2:2.12.4 AS base
 
 # The base image switches to the www-data user, we need to switch to root to do
 # our additions.
