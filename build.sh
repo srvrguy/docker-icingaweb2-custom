@@ -38,8 +38,8 @@ fi
 echo "Selected tool is: $BUILDTOOL"
 
 WORKING_DIR="$(realpath "$(dirname "$0")")"
-RELEASE_ARGS=(--target release --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$TAG" $WORKING_DIR)
-DEBUG_ARGS=(--target debug --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$DEBUG_TAG" $WORKING_DIR)
+RELEASE_ARGS=(--no-cache --target release --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$TAG" $WORKING_DIR)
+DEBUG_ARGS=(--no-cache --target debug --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$DEBUG_TAG" $WORKING_DIR)
 BUILD_CMD=($BUILDTOOL build --platform "$(cat platforms.txt)")
 
 case "$ACTION" in
