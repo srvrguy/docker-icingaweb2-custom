@@ -51,4 +51,8 @@ case "$ACTION" in
 		"${BUILD_CMD[@]}" --push "${RELEASE_ARGS[@]}"
 		"${BUILD_CMD[@]}" --push "${DEBUG_ARGS[@]}"
 		;;
+	load)
+		"${BUILD_CMD[@]}" --load "${RELEASE_ARGS[@]}"
+		"${BUILD_CMD[@]}" --load "${DEBUG_ARGS[@]}"
+		;;
 esac
