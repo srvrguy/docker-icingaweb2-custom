@@ -69,6 +69,15 @@ get_mod () {
 	get_altname "icingaweb2-module-$1" "$1"
 }
 
+get_ext_mod () {
+	rm -rf dockerweb2-temp
+	git clone --bare "${1}" dockerweb2-temp
+
+	git -C dockerweb2-temp archive "--prefix=${2}/" "HEAD" |tar -x
+	rm -rf dockerweb2-temp
+}
+
+
 MODE="$1"
 case "$MODE" in
 	release|snapshot) ;;
@@ -94,3 +103,4 @@ get_mod pdfexport
 # get_mod reporting
 # get_mod vspheredb
 # get_mod x509
+get_ext_mod https://github.com/Thomas-Gelf/icingaweb2-module-extragroups icingaweb2/modules/extragroups
