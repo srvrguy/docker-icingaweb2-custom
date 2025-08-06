@@ -1,58 +1,75 @@
 #!/bin/bash
 # Based on the Icinga 2 Docker image build.bash
 # Icinga 2 Docker image | (c) 2020 Icinga GmbH | GPLv2+
-set -exo pipefail
+set -euxo pipefail
 
-ACTION="$1"
-TAG="${2:-latest}"
-DEBUG_TAG="$TAG-debug"
+# Default values for variables
+ACTION="" # Stores a flag for either "push" or "load". If blank, it just does a plain build.
+TAG=latest
 
-if [ -z "$REPO_OWNER"]; then
-    echo "Environment variable REPO_OWNER is not set. This should be set by the build system automatically. If you are running this manually, set it before running." >&2
-    false
+usage() {
+	echo "Usage: ${0} [-t TAG] [-a <push|load>]"
+	exit 1
+}
+
+if [[ -z "${REPO_OWNER+isset}" ]]; then
+    echo "Environment variable REPO_OWNER is not set. This should be set by the build system automatically." >&2
+	echo "If you are running this manually, set it before running." >&2
+    exit 1
 fi
 
-if [ -z "$ACTION" ]; then
-	cat <<EOF >&2
-FATAL: You must specify an action to take
-Usage: ${0} [build|push [TAG]]
-EOF
-	false
-fi
+while getopts ":ha:t:" opt; do
+	case ${opt} in
+		a)
+			case "${OPTARG}" in
+				push)
+					ACTION="--push";;
+				load)
+					ACTION="--load";;
+				*)
+					echo "Invalid action: ${OPTARG}" 1>&2; usage;;
+			esac;;
+		t)
+			TAG="${OPTARG}"
+			;;
+		:)
+			echo "Invalid option: -${OPTARG} requires an argument" 1>&2; usage;
+			;;
+		\?)
+			echo "Invalid option: -${OPTARG}" 1>&2; usage;
+			;;
+		*)
+			usage
+			;;
+		esac
+done
 
-# DEBUG
-echo "Action is $ACTION"
-echo "Tag is $TAG"
+DEBUG_TAG="${TAG}-debug"
 
-# Check if this is using nerdctl or docker for the build
-if nerdctl version; then
+echo "Action is ${ACTION}"
+echo "Tag is ${TAG}"
+echo "Debug tag is ${DEBUG_TAG}"
+
+# Check for either nerdctl or docker commands to use for building images
+if command -v nerdctl; then
     BUILDTOOL=nerdctl
-elif docker buildx version; then
+elif command -v docker &> /dev/null && docker buildx version &> /dev/null; then
     BUILDTOOL="docker buildx"
 else
-    echo 'Neither nerdctl nor docker buildx are available.' >&2
-    false
+	echo "Cannot proceed. Neither nerdctl nor docker buildx are available." >&2
+    exit 1
 fi
 
-# DEBUG
-echo "Selected tool is: $BUILDTOOL"
+echo "Build tool selected: ${BUILDTOOL}"
 
+PLATFORMS="$(cat platforms.txt)"
+
+
+# Some variables used in building things below
 WORKING_DIR="$(realpath "$(dirname "$0")")"
 RELEASE_ARGS=(--no-cache --target release --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$TAG" $WORKING_DIR)
 DEBUG_ARGS=(--no-cache --target debug --tag "ghcr.io/$REPO_OWNER/icingaweb2-custom:$DEBUG_TAG" $WORKING_DIR)
-BUILD_CMD=($BUILDTOOL build --platform "$(cat platforms.txt)")
 
-case "$ACTION" in
-	build)
-		"${BUILD_CMD[@]}" "${RELEASE_ARGS[@]}"
-		"${BUILD_CMD[@]}" "${DEBUG_ARGS[@]}"
-		;;
-	push)
-		"${BUILD_CMD[@]}" --push "${RELEASE_ARGS[@]}"
-		"${BUILD_CMD[@]}" --push "${DEBUG_ARGS[@]}"
-		;;
-	load)
-		"${BUILD_CMD[@]}" --load "${RELEASE_ARGS[@]}"
-		"${BUILD_CMD[@]}" --load "${DEBUG_ARGS[@]}"
-		;;
-esac
+# Build both the "release" and "debug" images
+${BUILDTOOL} build ${ACTION} --platform ${PLATFORMS} ${RELEASE_ARGS[@]}
+${BUILDTOOL} build ${ACTION} --platform ${PLATFORMS} ${DEBUG_ARGS[@]}

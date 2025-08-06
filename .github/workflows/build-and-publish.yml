@@ -29,6 +29,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push
-        run: ./build.sh push ${{ github.ref_name }}
+        run: ./build.sh -a push -t ${{ github.ref_name }}
         env:
             REPO_OWNER: ${{ github.repository_owner }}
