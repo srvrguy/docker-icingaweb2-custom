@@ -1,6 +1,15 @@
 # This extends the base Icingaweb2 container image to include custom libraries for
 # other check plugins that are added in later in a volume.
 
+# Build our custom entrypoint binary
+# Ref: https://github.com/Icinga/docker-icingaweb2/issues/133
+FROM golang:bookworm AS entrypoint
+
+COPY entrypoint /entrypoint
+
+WORKDIR /entrypoint
+RUN ["go", "build", "."]
+
 # Grab updated modules for our custom image
 FROM composer:lts AS usr-share
 
@@ -25,6 +34,9 @@ RUN apt-get update ;\
 		curl iputils-ping less vim-tiny wget ;\
 	apt-get clean ;\
 	rm -vrf /var/lib/apt/lists/*
+
+# Copy in our patched entrypoint binary.
+COPY --from=entrypoint /entrypoint/entrypoint /entrypoint
 
 # Copy our earlier downloaded updated modules into the base
 COPY --from=usr-share /usr-share/. /usr/share/
