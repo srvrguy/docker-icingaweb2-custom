@@ -104,3 +104,5 @@ get_mod pdfexport
 # get_mod vspheredb
 # get_mod x509
 get_ext_mod https://github.com/Thomas-Gelf/icingaweb2-module-extragroups icingaweb2/modules/extragroups
+get_ext_mod https://github.com/NETWAYS/icingaweb2-module-perfdatagraphs-graphite icingaweb2/modules/perfdatagraphs-graphite
+get_ext_mod https://github.com/NETWAYS/icingaweb2-module-perfdatagraphs icingaweb2/modules/perfdatagraphs
