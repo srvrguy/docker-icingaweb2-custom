@@ -103,6 +103,7 @@ get_mod pdfexport
 # get_mod reporting
 # get_mod vspheredb
 # get_mod x509
+get_altname icinga-sso-web sso
 get_ext_mod https://github.com/Thomas-Gelf/icingaweb2-module-extragroups icingaweb2/modules/extragroups
 get_ext_mod https://github.com/NETWAYS/icingaweb2-module-perfdatagraphs-graphite icingaweb2/modules/perfdatagraphsgraphite
 get_ext_mod https://github.com/NETWAYS/icingaweb2-module-perfdatagraphs-influxdbv1 icingaweb2/modules/perfdatagraphsinfluxdbv1
