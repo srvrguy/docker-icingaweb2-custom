@@ -27,9 +27,11 @@ FROM icinga/icingaweb2:2.14.0 AS base
 # our additions.
 USER root
 
-# Additional packages installed via apt.
-# Keep package names in alphabetical order
-RUN apt-get update ;\
+# Upgrade the container packages and then add additional packages via apt.
+# For new packages, keep package names in alphabetical order
+RUN export DEBIAN_FRONTEND=noninteractive ;\
+	apt-get update ;\
+	apt-get upgrade -y ;\
 	apt-get install --no-install-recommends --no-install-suggests -y \
 		curl iputils-ping less vim-tiny wget ;\
 	apt-get clean ;\
